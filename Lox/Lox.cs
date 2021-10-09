@@ -14,7 +14,7 @@ namespace Lox
                     Console.WriteLine("Usage: clox [script]"); 
                     Environment.Exit(64);
                     break;
-                case 1: RunFile(args[1]); break;
+                case 1: RunFile(args[0]); break;
                 default: RunPrompt(); break;
             }
 

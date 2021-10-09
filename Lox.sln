@@ -6,11 +6,14 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
+		Test lox file|Any CPU = Test lox file|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{A1C0B750-809A-4127-BA67-6B5964996409}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A1C0B750-809A-4127-BA67-6B5964996409}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A1C0B750-809A-4127-BA67-6B5964996409}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A1C0B750-809A-4127-BA67-6B5964996409}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1C0B750-809A-4127-BA67-6B5964996409}.Test lox file|Any CPU.ActiveCfg = Test lox file|Any CPU
+		{A1C0B750-809A-4127-BA67-6B5964996409}.Test lox file|Any CPU.Build.0 = Test lox file|Any CPU
 	EndGlobalSection
 EndGlobal

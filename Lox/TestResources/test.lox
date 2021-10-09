@@ -1,0 +1,9 @@
+﻿if(true){
+    // this is a variable
+    var my_var = "Hello, kind sir! $$$ is good, no?";
+}
+
+var someVal - 55.41;
+if (someVal == 55.45 and someVal != 7 or someval != "hello") {
+    var success = true;
+}

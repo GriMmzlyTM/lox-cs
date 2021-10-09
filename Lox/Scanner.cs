@@ -55,6 +55,7 @@ namespace Lox {
                 case '\n':
                     _line++;
                     break;
+                case '"': ParseString(); break;
                 default:
                     if (IsDigit(c))
                         ParseNumber();
@@ -135,7 +136,7 @@ namespace Lox {
 
             Advance();
 
-            var val = _source.Substring(_start + 1, _endLength - 1);
+            var val = _source.Substring(_start + 1, _endLength - 2 );
             AddToken(TokenType.STRING, val);
         }
         #endregion
