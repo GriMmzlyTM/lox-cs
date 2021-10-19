@@ -19,10 +19,10 @@ namespace Lox.Expressions.Visitors {
             return stringBuilder.ToString();
         }
 
-        public string VisitBinaryExpr(Binary expr) => Parenthesize(expr.Operator.Lexeme, expr.Left, expr.Right);
-        public string VisitGroupingExpr(Grouping expr) => Parenthesize("group", expr.Expression);
-        public string VisitLiteralExpr(Literal expr) => expr.Value == null ? "nil" : expr.Value.ToString();
-        public string VisitUnaryExpr(Unary expr) => Parenthesize(expr.Operator.Lexeme, expr.Right);
+        public string VisitBinaryExpr(BinaryExpr expr) => Parenthesize(expr.Operator.Lexeme, expr.Left, expr.Right);
+        public string VisitGroupingExpr(GroupingExpr expr) => Parenthesize("group", expr.Expression);
+        public string VisitLiteralExpr(LiteralExpr expr) => expr.Value == null ? "nil" : expr.Value.ToString();
+        public string VisitUnaryExpr(UnaryExpr expr) => Parenthesize(expr.Operator.Lexeme, expr.Right);
 
     }
 }

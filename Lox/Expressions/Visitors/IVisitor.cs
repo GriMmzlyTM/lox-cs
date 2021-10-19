@@ -1,8 +1,8 @@
 ﻿namespace Lox.Expressions.Visitors {
     public interface IVisitor<T> { 
-        T VisitBinaryExpr(Binary expr);
-        T VisitGroupingExpr(Grouping expr);
-        T VisitLiteralExpr(Literal expr);
-        T VisitUnaryExpr(Unary expr);
+        T VisitBinaryExpr(BinaryExpr expr);
+        T VisitGroupingExpr(GroupingExpr expr);
+        T VisitLiteralExpr(LiteralExpr expr);
+        T VisitUnaryExpr(UnaryExpr expr);
     }
 }
