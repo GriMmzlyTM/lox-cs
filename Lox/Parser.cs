@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using Lox.Expressions;
 
 namespace Lox {
@@ -26,15 +28,32 @@ namespace Lox {
             return expr;
         }
 
-        private Token PreviousToken() {
+        bool Match(params TokenType[] types) =>
+            types.Any(Check) && Advance();
+
+        private bool Advance()
+        {
             
+        }
+        
+        private bool Check(TokenType type)
+        {
+            return false;
         }
 
-        private bool Match(TokenType type1, TokenType type2) {
-            
+        private Token PreviousToken()
+        {
+            return null;
         }
-        
-        private IExpr Comparison(){}
-        
+
+        private bool Match(TokenType type1, TokenType type2)
+        {
+            return true;
+        }
+
+        private IExpr Comparison()
+        {
+            return null;
+        }
     }
 }
