@@ -5,8 +5,8 @@ namespace Lox {
         private readonly string _source;
         private readonly List<Token> _tokens = new();
 
-        private int _start = 0;
-        private int _current = 0;
+        private int _start = 1;
+        private int _current = 1;
         private int _endLength => _current - _start;
         private int _line = 1;
         

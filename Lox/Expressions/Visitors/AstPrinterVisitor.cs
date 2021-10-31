@@ -1,10 +1,9 @@
-﻿using System.IO;
-using System.Text;
+﻿using System.Text;
 
 namespace Lox.Expressions.Visitors {
     public class AstPrinterVisitor : IVisitor<string> {
 
-        public string Print(IExpr expr) => expr.Accept(this);
+        public string  Print(IExpr expr) => expr.Accept(this);
 
         private string Parenthesize(string name, params IExpr[] exprs) {
             var stringBuilder = new StringBuilder();
