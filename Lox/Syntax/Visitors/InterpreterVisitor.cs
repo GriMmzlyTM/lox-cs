@@ -1,20 +1,27 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using Microsoft.CSharp.RuntimeBinder;
+using System.Threading;
+using System.Windows.Markup;
 
-namespace Lox.Expressions.Visitors {
+namespace Lox.Syntax.Visitors {
     public class InterpreterVisitor : IVisitor<object> {
 
-        public void Interpret(IExpr expression) {
+        private Environment _environment = new();
+        
+        public void Interpret(List<IStmt> stmts) {
             try {
-                var value = Evaluate(expression);
-                Console.WriteLine(Stringify(value));
+                foreach (var stmt in stmts) {
+                    Execute(stmt);
+                }
             }
             catch (RuntimeError err) {
                 Lox.RuntimeError(err);
             }
         }
+
+        private void Execute(IStmt stmt) => stmt.Accept(this);
 
         private string Stringify(object val) {
             if (val == null) return "nil";
@@ -53,7 +60,13 @@ namespace Lox.Expressions.Visitors {
             if (operand.All(x => x is double)) return;
             throw new RuntimeError(op, "Operands must be double values.");
         }
-        
+
+        public object VisitAssignExpr(AssignExpr expr) {
+            var val = Evaluate(expr.Value);
+            _environment.Assign(expr.Name, val);
+
+            return val;
+        }
         public object VisitBinaryExpr(BinaryExpr expr) {
             var (left1, @operator, right1) = expr;
             var left = Evaluate(left1);
@@ -64,11 +77,14 @@ namespace Lox.Expressions.Visitors {
                     CheckNumberOperands(expr.Operator, left, right);
                     return (double)left - (double)right;
                 case TokenType.PLUS:
-                    return (left is double leftDouble && right is double rightDouble) 
-                        ? leftDouble + rightDouble 
-                        : (left is string leftString && right is string rightString) 
-                            ? leftString + rightString
-                            : throw new RuntimeError(expr.Operator, "Operands must be two numbers or two strings.");
+
+                    if (left is double leftDouble && right is double rightDouble) return leftDouble + rightDouble;
+
+                    if (left is string || right is string) return left.ToString() + right.ToString();
+
+                    throw new RuntimeError(expr.Operator, "Operands must be numbers or strings.");
+
+                    break;
                 case TokenType.SLASH:
                     CheckNumberOperands(expr.Operator, left, right);
                     return (double)left / (double)right;
@@ -110,6 +126,60 @@ namespace Lox.Expressions.Visitors {
                     return null;
             }
 
+        }
+        public object VisitVariableExpr(VariableExpr expr) => _environment.Get(expr.Name);
+        public object VisitLogicalExpr(LogicalExpr expr) {
+            var left = Evaluate(expr.Left);
+            
+            if (expr.Op.Type == TokenType.OR) {
+                if (IsTruthy(left))
+                    return left;
+            }
+            else {
+                if (!IsTruthy(left)) return left;
+            }
+
+            return Evaluate(expr.Right);
+        }
+
+        public void VisitExpressionStmt(ExpressionStmt stmt) {
+            Evaluate(stmt.Expression);
+        }
+        
+        public void VisitPrintStmt(PrintStmt stmt) {
+            var value = Evaluate(stmt.Expression);
+            Console.WriteLine(Stringify(value));
+        }
+        
+        public void VisitVarStmt(VarStmt stmt) {
+            object value = null;
+            if (stmt.initializer != null) value = Evaluate(stmt.initializer);
+
+            _environment.Define(stmt.name, value);
+        }
+        public void VisitBlockStmt(BlockStmt stmt) {
+            ExecuteBlock(stmt.Statements, new Environment(_environment));
+        }
+        
+        public void VisitIfStmt(IfStmt stmt) {
+            if (IsTruthy(Evaluate(stmt.condition)))
+                Execute(stmt.thenBranch);
+            else if (stmt.elseBranch != null)
+                Execute(stmt.elseBranch);
+        }
+
+        public void ExecuteBlock(IEnumerable<IStmt> statements, Environment environment) {
+            var previousEnv = _environment;
+
+            try {
+                _environment = environment;
+                foreach (var stmt in statements) {
+                    Execute(stmt);
+                }
+            }
+            finally {
+                _environment = previousEnv;
+            }
         }
     }
 }

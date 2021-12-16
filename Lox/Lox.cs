@@ -2,7 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Text;
-using Lox.Expressions.Visitors;
+using Lox.Syntax.Visitors;
 
 namespace Lox
 {
@@ -17,7 +17,7 @@ namespace Lox
             switch (args.Length) {
                 case > 1:
                     Console.WriteLine("Usage: clox [script]"); 
-                    Environment.Exit(64);
+                    System.Environment.Exit(64);
                     break;
                 case 1: RunFile(args[0]); break;
                 default: RunPrompt(); break;
@@ -28,8 +28,8 @@ namespace Lox
             var bytes = File.ReadAllBytes(Path.GetFullPath(filePath));
             Run(Encoding.Default.GetString(bytes));
             
-            if (_hadError) Environment.Exit(65);
-            if (_hadRuntimeError) Environment.Exit(70);
+            if (_hadError) System.Environment.Exit(65);
+            if (_hadRuntimeError) System.Environment.Exit(70);
         }
 
         private static void RunPrompt() {
@@ -47,11 +47,11 @@ namespace Lox
             var tokens = scanner.ScanTokens();
 
             var parser = new Parser(tokens.ToList());
-            var expression = parser.Parse();
+            var statements = parser.Parse();
 
             if (_hadError) return;
             
-            _interpreterVisitor.Interpret(expression);
+            _interpreterVisitor.Interpret(statements);
         }
 
         public static void Error(int line, string message) {

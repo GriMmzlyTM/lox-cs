@@ -1,1 +1,23 @@
-﻿"something is" + " " + "wrong.";
+﻿var name = "Vivi";
+var age;
+
+age = 21;
+
+print "My name is " + name + " and I am " + age;
+
+var a = "global";
+var isLorenzo = "no";
+
+if (isLorenzo == "Goodbye" or isLorenzo == "yes")
+    print "It IS lorenzo!";
+else 
+    print "Its NOT Lorenzo!";
+
+{
+    print a;
+    var b = "scoped";
+    {
+        print b;
+    }
+    print b;
+}

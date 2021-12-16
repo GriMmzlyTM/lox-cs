@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
-using Lox.Expressions;
+using Lox.Syntax;
 
 namespace Lox {
     public class Parser {
@@ -14,13 +16,85 @@ namespace Lox {
             _tokens = tokens;
         }
 
-        public IExpr Parse() {
+        public List<IStmt> Parse() {
+            var statements = new List<IStmt>();
+
+            while (!IsAtEnd())
+                statements.Add(Declaration());
+
+            return statements;
+        }
+
+        private IStmt Declaration() {
             try {
-                return Expression();
+                return Match(TokenType.VAR) ? VarDeclaration() : Statement();
             }
-            catch (ParseError) {
-                return null;
+            catch (ParseError error) {
+                Synchronize();
+                return null;   
             }
+        }
+
+        private Stmt VarDeclaration() {
+            var name = Consume(TokenType.IDENTIFIER, "Expect variable name.");
+
+            IExpr initializer = null;
+            if (Match(TokenType.EQUAL)) {
+                initializer = Expression();
+            }
+
+            Consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.");
+            return new VarStmt(name, initializer);
+        }
+
+        private IStmt Statement() {
+            if (Match(TokenType.IF))
+                return IfStatement();
+            
+            if (Match(TokenType.PRINT))
+                return PrintStatement();
+
+            if (Match(TokenType.LEFT_BRACE))
+                return new BlockStmt(Block());
+
+            return ExpressionStatement();
+        }
+
+        private IStmt IfStatement() {
+            Consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.");
+            var condition = Expression();
+            Consume(TokenType.RIGHT_PAREN, "Expect ')' after if condition.");
+
+            var thenBranch = Statement();
+            IStmt elseBranch = null;
+
+            if (Match(TokenType.ELSE))
+                elseBranch = Statement();
+
+            return new IfStmt(condition, thenBranch, elseBranch);
+        }
+
+        private IEnumerable<IStmt> Block() {
+            var statements = new List<IStmt>();
+
+            while (!Check(TokenType.RIGHT_BRACE) && !IsAtEnd()) {
+                statements.Add(Declaration());
+            }
+
+            Consume(TokenType.RIGHT_BRACE, "Expect '}' after block.");
+            return statements;
+        }
+
+        private IStmt ExpressionStatement() {
+            var expr = Expression();
+            Consume(TokenType.SEMICOLON, "Expect ';' after expression.");
+            return new ExpressionStmt(expr);
+        }
+        
+        private IStmt PrintStatement() {
+            var value = Expression();
+            Consume(TokenType.SEMICOLON, "Expect ';' after value.");
+            return new PrintStmt(value);
         }
 
         private void Synchronize() {
@@ -46,7 +120,51 @@ namespace Lox {
         }
 
         private IExpr Expression() {
-            return Equality();
+            return Assignment();
+        }
+
+        private IExpr Assignment() {
+
+            var expr = Or();
+
+            if (!Match(TokenType.EQUAL)) return expr;
+            
+            var equals = Previous();
+            var value = Assignment();
+
+            if (expr is VariableExpr varExpr) {
+                var name = varExpr.Name;
+                return new AssignExpr(name, value);
+            }
+
+            Error(equals, "Invalid assignment target.");
+
+            return expr;
+        }
+
+        private IExpr Or() {
+            var expr = And();
+
+            while (Match(TokenType.OR)) {
+                var @operator = Previous();
+                var right = And();
+                expr = new LogicalExpr(expr, @operator, right);
+            }
+
+            return expr;
+        }
+
+        private IExpr And() {
+            var expr = Equality();
+            
+            while(Match(TokenType.AND))
+            {
+                var @operator = Previous();
+                var right = Equality();
+                expr = new LogicalExpr(expr, @operator, right);
+            }
+
+            return expr;
         }
 
         private IExpr Equality() {
@@ -112,6 +230,8 @@ namespace Lox {
 
             if (Match(TokenType.NUMBER, TokenType.STRING)) return new LiteralExpr(Previous().Literal);
 
+            if (Match(TokenType.IDENTIFIER)) return new VariableExpr(Previous());
+            
             if (Match(TokenType.LEFT_PAREN)) {
                 var expr = Expression();
                 Consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.");

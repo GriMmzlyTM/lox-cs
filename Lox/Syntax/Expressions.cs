@@ -1,14 +1,17 @@
-﻿using Lox.Expressions.Visitors;
+﻿using Lox.Syntax.Visitors;
 
-namespace Lox.Expressions {
+namespace Lox.Syntax {
     public interface IExpr {
         T Accept<T>(IVisitor<T> visitor);
     }
     public abstract record Expr : IExpr {
         public abstract T Accept<T>(IVisitor<T> visitor);
     }
-    
+
     // Implementations
+    public record AssignExpr(Token Name, IExpr Value) : Expr {
+        public override T Accept<T>(IVisitor<T> visitor) => visitor.VisitAssignExpr(this);
+    }
     public record BinaryExpr (IExpr Left, Token Operator, IExpr Right) : Expr {
         public override T Accept<T>(IVisitor<T> visitor) => visitor.VisitBinaryExpr(this);
     }
@@ -20,5 +23,12 @@ namespace Lox.Expressions {
     }
     public record UnaryExpr (Token Operator, IExpr Right) : Expr {
         public override T Accept<T>(IVisitor<T> visitor) => visitor.VisitUnaryExpr(this);
+    }
+    public record VariableExpr(Token Name) : Expr {
+        public override T Accept<T>(IVisitor<T> visitor) => visitor.VisitVariableExpr(this);
+    }
+    
+    public record LogicalExpr(IExpr Left, Token Op, IExpr Right) : Expr {
+        public override T Accept<T>(IVisitor<T> visitor) => visitor.VisitLogicalExpr(this);
     }
 }
